@@ -14,8 +14,8 @@ var (
 	once      sync.Once
 )
 
-// LoadFiles sus argumentos
-// son de tipo string porque le enviamos solo la ruta del archivo
+// LoadFiles
+// sus argumentos son de tipo string porque le enviamos solo la ruta del archivo
 func LoadFiles(privateFile, publicFile string) error {
 	var err error
 	once.Do(func() {
@@ -38,7 +38,6 @@ func readAndLoadFiles(privateFile, publicFile string) error {
 }
 
 // Function parse rsa keys
-
 func parseRSA(privateBytes, publicBytes []byte) error {
 	var err error
 	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateBytes)

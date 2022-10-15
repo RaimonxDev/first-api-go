@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"FirstCrud/internal/auth"
+	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +13,6 @@ func Log(next http.HandlerFunc) http.HandlerFunc {
 		// Do stuff here
 		defer timeTrack(time.Now(), r.URL.Path)
 		log.Printf("Request: %s, method: %s", r.URL.Path, r.Method)
-		Authentication(next)(w, r)
 	}
 }
 func timeTrack(start time.Time, name string) {
@@ -21,33 +21,18 @@ func timeTrack(start time.Time, name string) {
 }
 
 // Authentication Middleware
-func Authentication(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-
+func Authentication(f echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Request().Header.Get("Authorization")
+		if token == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Not Authorized")
+		}
 		_, err := auth.ValidateToken(token)
 
 		if err != nil {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
+			return c.JSON(http.StatusForbidden, "Forbidden")
 		}
-		//// Simulate authentication
-		//if token != "Bearer 123456789" {
-		//	http.Error(w, "Forbidden", http.StatusForbidden)
-		//	return
-		//}
-		next(w, r)
+
+		return f(c)
 	}
 }
-
-// Middleware is a function that wraps a function and returns a function.
-
-// Middleware Custom type for middleware
-//type Middleware func(string)
-//NO USED
-//func Log(f Middleware) Middleware {
-//	return func(s string) {
-//		fmt.Println(time.Now().Format("15:04:05")) // Print the current time
-//		f(s)
-//	}
-//}

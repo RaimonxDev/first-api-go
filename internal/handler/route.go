@@ -2,20 +2,27 @@ package handler
 
 import (
 	"FirstCrud/internal/middleware"
-	"net/http"
+	"github.com/labstack/echo/v4"
 )
 
-func RoutePerson(mux *http.ServeMux, storage Storage) {
-	person := newPerson(storage)
-	mux.HandleFunc("/v1/persons", middleware.Authentication(person.GetAll))
-	mux.HandleFunc("/v1/persons/create", middleware.Authentication(person.Create))
-	mux.HandleFunc("/v1/persons/update", middleware.Log(person.Update))
-	mux.HandleFunc("/v1/persons/delete", middleware.Log(person.Delete))
-	mux.HandleFunc("/v1/persons/person", middleware.Log(person.GetByID))
+// RoutePerson Init routes for Person
+func RoutePerson(e *echo.Echo, storage Storage) {
+	handler := newPerson(storage)
+
+	// Create a group for all routes
+	person := e.Group("/v1/persons")
+	person.Use(middleware.Authentication)
+
+	// Register Routes
+	person.GET("", handler.GetAll)
+	person.POST("", handler.Create)
+	person.PUT("/:id", handler.Update)
+	person.DELETE("/:id", handler.Delete)
+	person.GET("/:id", handler.GetByID)
 }
 
-// Route Login
-func RouteLogin(mux *http.ServeMux, storage Storage) {
+// RouteLogin Init routes for Login
+func RouteLogin(e *echo.Echo, storage Storage) {
 	login := newLogin(storage)
-	mux.HandleFunc("/v1/login", login.login)
+	e.POST("/v1/login", login.login)
 }

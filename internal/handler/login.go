@@ -3,7 +3,8 @@ package handler
 import (
 	"FirstCrud/internal/auth"
 	"FirstCrud/internal/model"
-	"encoding/json"
+	"errors"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
@@ -15,47 +16,30 @@ func newLogin(s Storage) login {
 	return login{s}
 }
 
-func (l *login) login(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodPost {
-		response := NewResponse(
-			"METHOD NO ALLOWED",
-			http.StatusBadRequest, "Bad Request", nil)
-		response.ToJSON(w)
-		return
-	}
-	if r.Header.Get("Authorization") == "" {
-		response := NewResponse("MISSING TOKEN", http.StatusBadRequest, "Bad request", nil)
-		response.ToJSON(w)
-		return
-	}
+func (l *login) login(c echo.Context) error {
 
 	data := model.Login{}
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := c.Bind(&data) // Bind data from request to model
 	if err != nil {
-		respose := NewResponse("JSON NO VALID", http.StatusBadRequest, "Bad Request", nil)
-		respose.ToJSON(w)
-		return
+		// Return error like json
+		return c.JSON(http.StatusBadRequest, errors.New("invalid json"))
 	}
 
 	if !isLoginValid(data) {
-		response := NewResponse("Email or Password no valid", http.StatusBadRequest, "Bad Request", nil)
-		response.ToJSON(w)
-		return
+		response := NewResponse("Email or Password not valid", http.StatusBadRequest, "Bad Request", nil)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 	token, err := auth.GenerateToken(&data)
 	if err != nil {
 		response := NewResponse("Error to generate token", http.StatusInternalServerError, "Internal Server Error", nil)
-		response.ToJSON(w)
-		return
+		return c.JSON(http.StatusInternalServerError, response)
 	}
 	dataToken := map[string]string{
 		"token": token,
 		"user":  data.Email,
 	}
 	response := NewResponse("Login OK", http.StatusOK, nil, dataToken)
-	response.ToJSON(w)
-	return
+	return c.JSON(http.StatusOK, response)
 }
 
 // Simulate a login

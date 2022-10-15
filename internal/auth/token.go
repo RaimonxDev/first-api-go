@@ -32,13 +32,13 @@ func ValidateToken(t string) (model.Claims, error) {
 	}
 
 	if !token.Valid {
-		return model.Claims{}, errors.New("Token not valid")
+		return model.Claims{}, errors.New("token not valid")
 	}
 
 	claim, ok := token.Claims.(*model.Claims)
 
 	if !ok {
-		return model.Claims{}, errors.New("Claims no valid")
+		return model.Claims{}, errors.New("claims no valid")
 	}
 	return *claim, nil
 }
