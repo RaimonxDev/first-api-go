@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"FirstCrud/internal/auth"
 	"log"
 	"net/http"
 	"time"
@@ -23,15 +24,18 @@ func timeTrack(start time.Time, name string) {
 func Authentication(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
-		if token == "" {
+
+		_, err := auth.ValidateToken(token)
+
+		if err != nil {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		// Simulate authentication
-		if token != "Bearer 123456789" {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
+		//// Simulate authentication
+		//if token != "Bearer 123456789" {
+		//	http.Error(w, "Forbidden", http.StatusForbidden)
+		//	return
+		//}
 		next(w, r)
 	}
 }
