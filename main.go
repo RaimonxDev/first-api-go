@@ -5,6 +5,7 @@ import (
 	"FirstCrud/internal/handler"
 	"FirstCrud/internal/storage"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"log"
 )
 
@@ -18,6 +19,9 @@ func main() {
 
 	//Init Echo
 	e := echo.New()
+	//Middleware Globals
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
 
 	handler.RouteLogin(e, &store)
 	handler.RoutePerson(e, &store)
