@@ -6,6 +6,7 @@ type Community struct {
 }
 
 type Persons []Person
+
 type Person struct {
 	Name        string      `json:"name"`
 	Age         uint8       `json:"age"`
